@@ -3,22 +3,22 @@
 #
 # The web application binaries are downloaded from JBoss Nexus Repository.
 #
-# The Docker image generated name/tag is "jboss/jbpm-workbench:6.2.0.Final"
+# The Docker image generated name/tag is "trigsoft/wildfly-jbpm:6.2.0-Final"
 ###########################################################################
 
 ####### BASE ############
-FROM jboss/wildfly:8.1.0.Final
+FROM trigsoft/wildfly:8.2.0-Final
 
 ####### MAINTAINER ############
-MAINTAINER "Roger Martinez" "romartin@redhat.com"
+MAINTAINER "ijazfx" "ijazfx@gmail.com"
 
 ####### ENVIRONMENT ############
 ENV KIE_REPOSITORY https://repository.jboss.org/nexus/content/groups/public-jboss/
 ENV JBPM_VERSION 6.2.0.Final
 ENV JBPM_CLASSIFIER wildfly8
-ENV JBPM_CONTEXT_PATH jbpm-console
+ENV JBPM_CONTEXT_PATH kie-wb
 ENV DASHBUILDER_CONTEXT_PATH dashbuilder
-ENV JAVA_OPTS -XX:MaxPermSize=256m -Xms256m -Xmx512m
+ENV JAVA_OPTS -XX:MaxPermSize=256m -Xms256m -Xmx1024m
 USER root
 
 ####### JBPM-WB ############
@@ -41,9 +41,10 @@ RUN chown jboss:jboss $JBOSS_HOME/standalone/deployments/*
 # Switchback to jboss user
 USER jboss
 
+# Update users to access jBPM Dashboard
+ADD add-users.sh /tmp/
+RUN /tmp/add-users.sh
+
 ####### EXPOSE INTERNAL JBPM GIT PORT ############
 EXPOSE 8001
 
-####### RUNNING JBPM-WB ############
-WORKDIR $JBOSS_HOME/bin/
-CMD ["./standalone.sh", "-b", "0.0.0.0", "--server-config=standalone-full.xml"]
